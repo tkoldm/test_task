@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block content%}
+    <h1> Профиль {{ user }} </h1>
+
+    <h2>Объявления пользователя</h2>
+    <h3>Сортировать по <a href="/profile/{{ articles[0].user }}">Дате добавления</a> <a href="/profile/{{ articles[0].user }}/sort_title">Заголовку</a> 
+        <a href="/profile/{{ articles[0].user }}/sort_update">Дате обновления</a>
+    {% for article in articles %}
+        <div>
+            <h1>{{ article.title }}</h1>
+            <h5>Создано: {{ article.create_date.date() }} Обновлено: {{ article.update_date.date() }}</h5>
+            <h5>Пользователь: {{ user }}</h5>
+            <h1>{{ article.body }}</h1>
+            <br>
+            <a href="/articles/{{ article.id }}">Детальнее</a>
+        </div>
+        <hr>
+    {% endfor %}
+{% endblock %}

@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Объявдения</h1>
+    <h3>Сортировать по <a href="/articles">Дате добавления</a> <a href="/articles/sort_title">Заголовку</a> 
+        <a href="/articles/sort_update">Дате обновления</a> <a href='/articles/sort_user'>По пользователям</a>
+    {% for article in articles %}
+        <div>
+            <h1>{{ article.title }}</h1>
+            <h5>Создано: {{ article.create_date.date() }} пользователем <a href='/profile/{{ article.user_id }}'>{{ article.username }}</a></h5>
+            <h5>Обновлено: {{ article.update_date.date() }}</h5>
+            <h1>{{ article.body }}</h1>
+            <a href="/articles/{{ article.id }}">Детальнее</a>
+            <br>
+        </div>
+        <hr>
+    {% endfor %}
+{% endblock %}

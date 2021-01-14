@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div>
+    <form method="post">
+        <h1>Заголвок </h1> <input type="text" name="title">
+        <br>
+        <h1>Текст </h1> <textarea type="text" name="body"></textarea>
+        <br>
+        <br>
+        <button type="submit">Создать</button>
+    </form>
+</div>
+{% endblock %}
