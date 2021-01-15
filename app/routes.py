@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from datetime import datetime
 from app import app, db, login
+from config import ARTICLES_PER_PAGE
 from app.models import Role, Article, User
 from flask import render_template, url_for, request, redirect, jsonify
 from flask_login import current_user, login_user, logout_user
@@ -13,11 +14,12 @@ def index():
     return redirect(url_for('articles_list'))
 
 
-@app.route('/articles')
-def articles_list():
-    articles = Article.query.order_by(Article.create_date.desc()).all()
+@app.route('/api/articles')
+@app.route('/api/articles/page_<int:page>')
+def articles_list(page=1):
+    articles = Article.query.order_by(Article.create_date.desc()).paginate(page, ARTICLES_PER_PAGE, False)
     articles_to_template = []
-    for article in articles:
+    for article in articles.items:
         if not article.remove_date:
             user = User.query.filter_by(id=article.user).first()
             obj = {
@@ -35,7 +37,7 @@ def articles_list():
     return jsonify({'articles': articles_to_template})
 
 
-@app.route('/articles/sort_<string:pole>')
+@app.route('/api/articles/sort_<string:pole>')
 def article_sort(pole):
     if pole == 'title':
         articles = Article.query.order_by(Article.title.desc()).all()
@@ -62,7 +64,7 @@ def article_sort(pole):
     return jsonify({'artciles':articles_to_template})
 
 
-@app.route('/articles/<int:id>', methods=['GET','POST', 'DELETE', 'PUT'])
+@app.route('/api/articles/<int:id>', methods=['GET','POST', 'DELETE', 'PUT'])
 def article_detail(id):
     if request.method == 'GET':
         article = Article.query.get(id)
@@ -109,7 +111,7 @@ def article_detail(id):
             return jsonify({'Error':'Article deleted'})
 
 
-@app.route('/add_article', methods=['POST'])
+@app.route('/api/add_article', methods=['POST'])
 def add_new_article():
     if current_user.is_authenticated:
         title = request.form['title']
@@ -130,7 +132,7 @@ def load_user(id):
     return User.query.get(int(id))
 
 
-@app.route('/authorization', methods=['POST'])
+@app.route('/api/authorization', methods=['POST'])
 def authorization():
     if current_user.is_authenticated:
         return redirect(url_for('articles_list'))
@@ -148,12 +150,13 @@ def authorization():
         return redirect(url_for('articles_list'))
 
 
-@app.route('/profile/<int:id>')
-def user_profile(id):
+@app.route('/api/profile/<int:id>')
+@app.route('/api/profile/<int:id>/page_<int:page>')
+def user_profile(id, page=1):
     user = User.query.filter_by(id=id).first_or_404()
-    articles = Article.query.order_by(Article.create_date.desc()).filter_by(user=id).all()
+    articles = Article.query.order_by(Article.create_date.desc()).filter_by(user=id).paginate(page, ARTICLES_PER_PAGE, False)
     articles_to_template = []
-    for article in articles:
+    for article in articles.items:
         if not article.remove_date:
             obj = {
                 'id': article.id,
@@ -169,7 +172,7 @@ def user_profile(id):
     return jsonify({'articles':articles_to_template})
 
 
-@app.route('/profile/<int:id>/sort_<string:pole>')
+@app.route('/api/profile/<int:id>/sort_<string:pole>')
 def user_profile_sort(id, pole):
     user = User.query.filter_by(id=id).first_or_404()
     if pole == 'title':
@@ -195,14 +198,14 @@ def user_profile_sort(id, pole):
     return jsonify({'articles':articles_to_template})
 
 
-@app.route('/logout')
+@app.route('/api/logout')
 def logout():
     if current_user.is_authenticated:
         logout_user()
     return redirect(url_for('articles_list'))
 
 
-@app.route('/registration', methods=['POST'])
+@app.route('/api/registration', methods=['POST'])
 def registration():
     name = request.form['u_name']
     username = request.form['username']
@@ -211,7 +214,7 @@ def registration():
     user = User.query.filter_by(username=username).first()
 
     if user:
-        return redirect(url_for('authorization'))
+        return jsonify({'Success':'User has been registered'})
 
     new_user = User(name=name, username=username, password=password)
 

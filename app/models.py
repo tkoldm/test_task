@@ -30,7 +30,7 @@ class User(UserMixin, db.Model):
 class Article(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     create_date = db.Column(db.DateTime, default=datetime.utcnow)
-    update_date = db.Column(db.DateTime, default=datetime.utcnow)
+    update_date = db.Column(db.DateTime)
     remove_date = db.Column(db.DateTime)
     user = db.Column(db.Integer, db.ForeignKey(User.id))
     title = db.Column(db.String(128))
