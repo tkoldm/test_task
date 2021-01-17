@@ -16,10 +16,11 @@ login = LoginManager(app)
 login.init_app(app)
 admin = Admin(app)
 
-from app import routes
-from app.user import User
-from app.articles import Article
-from app.role import Role
+from app import user_routes 
+from app import article_routes
+from app.user_model import User
+from app.article_model import Article
+from app.role_model import Role
 
 admin.add_view(ModelView(User, db.session))
 admin.add_view(ModelView(Role, db.session))
