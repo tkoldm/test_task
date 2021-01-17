@@ -13,8 +13,16 @@ db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
 login = LoginManager(app)
+login.init_app(app)
 admin = Admin(app)
 
-from app import routes, models
+from app import routes
+from app.user import User
+from app.articles import Article
+from app.role import Role
+
+admin.add_view(ModelView(User, db.session))
+admin.add_view(ModelView(Role, db.session))
+admin.add_view(ModelView(Article, db.session))
 
 
