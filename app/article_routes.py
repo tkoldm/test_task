@@ -47,28 +47,30 @@ def articles_list():
     return jsonify({'articles': articles_to_template})
 
 
-@app.route('/api/articles/<int:id>', methods=['GET', 'DELETE', 'PUT'])
-@basic_auth.login_required
+@app.route('/api/articles/<int:id>', methods=['GET'])
 def article_detail(id):
-    if request.method == 'GET':
-        article = Article.query.get(id)
-        if article.remove_date:
-            return error_response(410, 'Article has been deleted')
-        user = User.query.get(article.user)
-        obj = {
-                'id': article.id,
-                'create_date': article.create_date,
-                'update_date': article.update_date,
-                'remove_date': article.remove_date,
-                'user_id': article.user,
-                'username': user.username,
-                'title': article.title,
-                'body': article.body,
-                'end_date': article.end_date
-            }
-        return jsonify({'article':obj})
+    article = Article.query.get(id)
+    if article.remove_date:
+        return error_response(410, 'Article has been deleted')
+    user = User.query.get(article.user)
+    obj = {
+            'id': article.id,
+            'create_date': article.create_date,
+            'update_date': article.update_date,
+            'remove_date': article.remove_date,
+            'user_id': article.user,
+            'username': user.username,
+            'title': article.title,
+            'body': article.body,
+            'end_date': article.end_date
+        }
+    return jsonify({'article':obj})
     
-    elif request.method == 'PUT':
+
+@app.route('/api/articles/<int:id>', methods=['DELETE', 'PUT'])
+@basic_auth.login_required
+def article_detail_ch(id):
+    if request.method == 'PUT':
         
         if g.current_user.is_authenticated:
             try:
