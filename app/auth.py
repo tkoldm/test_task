@@ -11,7 +11,10 @@ def verify_password(username, password):
     if user is None or user.remove_date:
         return False
     g.current_user = user
-    return user.check_password(password)
+    if user.password == password:
+        return True
+    else:
+        return False
 
 @basic_auth.error_handler
 def basic_auth_error():

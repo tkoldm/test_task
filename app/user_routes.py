@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 from datetime import datetime
-from flask import request, jsonify
+from flask import request, jsonify, g
 from flask_login import current_user, login_user, logout_user, login_required
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
-
+from app.auth import basic_auth
 from app import app, db, login
 from config import ARTICLES_PER_PAGE
 from app.article_model import Article
@@ -19,19 +19,21 @@ def load_user(id):
 
 @app.route('/api/authorization', methods=['POST'])
 def authorization():
-    if g.current_user.is_authenticated:
-        g = None
-
-    user = User.query.filter_by(username=g.current_user.username).first()
+    
+    username = request.json['username']
+    password = request.json['password']
+    user = User.query.filter_by(username=username).first()
     if user:
         if not user.remove_date:
             if user.password == password:
+                g.current_user = user
                 login_user(user, remember=True)
                 print(current_user.is_authenticated)
                 return jsonify({'Success':'User has been authenticated'})
-
             else:
-                return error_response(410, 'Deleted user')
+                return error_response(404, 'Wrong password')
+        else:
+            return error_response(410, 'Deleted user')
     else:
         return error_response(404, "Incorrect data")
 

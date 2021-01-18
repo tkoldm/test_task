@@ -76,8 +76,8 @@ def article_detail(id):
             except:
                 return error_response(404, 'Article doesn\'t exist')
 
-            if not current_user.remove_date:
-                if user_id == article.user:
+            if not g.current_user.remove_date:
+                if g.current_user.id == article.user:
                     if not article.remove_date:
                         article = Article.query.filter_by(id = id).update({'update_date': datetime.utcnow()})
                         db.session.commit()
