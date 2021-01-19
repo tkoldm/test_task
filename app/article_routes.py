@@ -3,11 +3,12 @@ from datetime import datetime
 from flask import g, url_for, request, redirect, jsonify
 from flask_login import current_user
 from app.auth import basic_auth
-from app import app, db
+from app import app, db, celery
 from config import ARTICLES_PER_PAGE
 from app.article_model import Article
 from app.user_model import User
 from app.errors import error_response
+from app.task import mark_article_deleted
 
 @app.route('/')
 def index():
@@ -128,7 +129,9 @@ def add_new_article():
             body = request.json['body']                
             article = Article(title=title, body=body, user=g.current_user.id)                
             db.session.add(article)
-            db.session.commit()            
+            db.session.commit()
+            article = Article.query.order_by(Article.create_date.desc()).filter_by(user=g.current_user.id).first()
+            mark_article_deleted.apply_async(args=[article.id], countdown=60)
             return jsonify({'Success':'Artlicle has been added'})
         else:
             return error_response(401, f'User {user.username} has been blocked')

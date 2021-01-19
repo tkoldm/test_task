@@ -5,12 +5,6 @@
     <title>{% block title %}{% endblock %}</title>
 </head>
 <body>
-    <div>
-        <a href="{{ url_for('articles_list') }}">Объявления</a> <a href="{{ url_for('registration') }}">Регистрация</a> 
-        <a href="{{ url_for('authorization') }}">Авторизация</a> <a href="{{ url_for('add_new_article') }}"> Добавить объявление</a> 
-        <a href="{{ url_for('logout') }}">Выход</a>
-    </div>
-    <hr>
     {% block content %}
 
     {% endblock %}
