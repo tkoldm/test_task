@@ -5,8 +5,8 @@ from flask_login import current_user
 from app.auth import basic_auth
 from app import app, db, celery
 from config import ARTICLES_PER_PAGE
-from app.article_model import Article
-from app.user_model import User
+from app.models.article_model import Article
+from app.models.user_model import User
 from app.errors import error_response
 from app.task import mark_article_deleted
 

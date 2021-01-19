@@ -7,9 +7,9 @@ from flask_admin.contrib.sqla import ModelView
 from app.auth import basic_auth
 from app import app, db, login
 from config import ARTICLES_PER_PAGE
-from app.article_model import Article
-from app.role_model import Role
-from app.user_model import User
+from app.models.article_model import Article
+from app.models.role_model import Role
+from app.models.user_model import User
 from app.errors import error_response
 
 @login.user_loader

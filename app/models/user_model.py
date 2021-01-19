@@ -1,7 +1,7 @@
 from flask_login import UserMixin
 from app import db
 from app.dates_mixin import DateMixin
-from app.role_model import Role
+from app.models.role_model import Role
 from datetime import datetime
 
 

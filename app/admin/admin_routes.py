@@ -1,8 +1,8 @@
 from flask import render_template, url_for, request
 from flask_admin import expose
 from flask_login import current_user, login_user, logout_user
-from app.user_model import User
-from app.role_model import Role
+from app.models.user_model import User
+from app.models.role_model import Role
 from app import app, db
 
 @app.route('/login', methods=['POST', 'GET'])

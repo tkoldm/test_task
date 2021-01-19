@@ -4,9 +4,9 @@ from flask_login import current_user
 from flask_admin.model import BaseModelView
 from flask_admin.contrib.sqla import ModelView
 from app import db
-from app import admin_routes
-from app.user_model import User
-from app.role_model import Role
+from app.admin import admin_routes
+from app.models.user_model import User
+from app.models.role_model import Role
 
 class AdminView(ModelView):
 

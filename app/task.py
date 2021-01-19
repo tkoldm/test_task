@@ -1,6 +1,6 @@
 from datetime import datetime
 from app import celery, db
-from app.article_model import Article
+from app.models.article_model import Article
 
 @celery.task
 def mark_article_deleted(id):

@@ -19,13 +19,13 @@ celery.conf.update(app.config)
 login = LoginManager(app)
 login.init_app(app)
 
-from app import user_routes 
-from app import article_routes
-from app.admin_model import AdminView
-from app import admin_routes
-from app.user_model import User
-from app.article_model import Article
-from app.role_model import Role
+from app.routes import user_routes 
+from app.routes import article_routes
+from app.admin.admin_model import AdminView
+from app.admin import admin_routes
+from app.models.user_model import User
+from app.models.article_model import Article
+from app.models.role_model import Role
 
 admin = Admin(app)#, index_view=AdminView(name='home'))
 admin.add_view(AdminView(User, db.session))
