@@ -11,6 +11,5 @@ class Article(DateMixin, db.Model):
     body = db.Column(db.Text)
     end_date = db.Column(db.DateTime)
 
-
     def __repr__(self):
         return f'<Article {self.id}>'

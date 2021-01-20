@@ -82,7 +82,9 @@ def article_detail_ch(id):
             if not g.current_user.remove_date:
                 if g.current_user.id == article.user:
                     if not article.remove_date:
-                        article = Article.query.filter_by(id = id).update({'update_date': datetime.utcnow()})
+                        title = request.json['title']
+                        body = request.json['body']
+                        article = Article.query.filter_by(id = id).update({'title': datetime.utcnow(), 'body':body})
                         db.session.commit()
                         return jsonify({'Success':'Article has been updated'})
                     else:
