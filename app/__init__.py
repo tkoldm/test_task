@@ -27,7 +27,7 @@ from app.models.user_model import User
 from app.models.article_model import Article
 from app.models.role_model import Role
 
-admin = Admin(app)#, index_view=AdminView(name='home'))
+admin = Admin(app)
 admin.add_view(AdminView(User, db.session))
 admin.add_view(AdminView(Role, db.session))
 admin.add_view(AdminView(Article, db.session))

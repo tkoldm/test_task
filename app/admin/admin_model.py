@@ -12,12 +12,6 @@ class AdminView(ModelView):
 
     def is_accessible(self):
         if current_user.is_authenticated:
-            role_id = current_user.role
-            role = Role.query.filter_by(id=role_id).first()
-            if role.name != 'user':
-                if role.name == 'moderator':
-                    can_create = False
-                    can_delete = False
-                    can_edit = False
+            if current_user.is_admin:
                 return True
         return False

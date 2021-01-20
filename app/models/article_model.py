@@ -1,5 +1,5 @@
 from app import db
-from app.dates_mixin import DateMixin
+from app.models.dates_mixin import DateMixin
 from app.models.user_model import User
 from datetime import datetime
 
