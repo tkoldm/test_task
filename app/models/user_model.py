@@ -8,7 +8,7 @@ class User(UserMixin, DateMixin, db.Model):
     username = db.Column(db.String(64), unique=True, index=True)
     password = db.Column(db.String(64))
     name = db.Column(db.String(128))
-    is_admin = db.Column(db.Boolean)
+    is_admin = db.Column(db.Boolean, default=False)
     
 
     def __repr__(self):
