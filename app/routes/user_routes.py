@@ -41,15 +41,16 @@ def authorization():
 @app.route('/api/profile/<int:id>')
 def user_profile(id):
     page = request.args.get('page', 1, type=int)
+    on_page = request.args.get('on_page', ARTICLES_PER_PAGE, type=int)
     sort_type = request.args.get('sort_by', 'date', type=str)
     
     user = User.query.filter_by(id=id).first_or_404()
     if sort_type == 'date':
-        articles = Article.query.order_by(Article.create_date.desc()).filter_by(user=id).paginate(page, ARTICLES_PER_PAGE, False)
+        articles = Article.query.order_by(Article.create_date.desc()).filter_by(user=id).paginate(page, on_page, False)
     elif pole == 'title':
-        articles = Article.query.order_by(Article.title.desc()).filter_by(user=id).paginate(page, ARTICLES_PER_PAGE, False)
+        articles = Article.query.order_by(Article.title.desc()).filter_by(user=id).paginate(page, on_page, False)
     elif pole == 'update':
-        articles = Article.query.order_by(Article.update_date.desc()).filter_by(user=id).paginate(page, ARTICLES_PER_PAGE, False)
+        articles = Article.query.order_by(Article.update_date.desc()).filter_by(user=id).paginate(page, on_page, False)
     articles_to_template = []
     for article in articles.items:
         if not article.remove_date:
