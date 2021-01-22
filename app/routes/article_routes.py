@@ -133,7 +133,8 @@ def add_new_article():
             db.session.add(article)
             db.session.commit()
             article = Article.query.order_by(Article.create_date.desc()).filter_by(user=g.current_user.id).first()
-            mark_article_deleted.apply_async(args=[article.id], countdown=60)
+            #mark_article_deleted.apply_async(args=[article.id], countdown=60)
+            mark_article_deleted.delay(article.id)
             return jsonify({'Success':'Artlicle has been added'})
         else:
             return error_response(401, f'User {user.username} has been blocked')
