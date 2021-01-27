@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from datetime import datetime
-from flask import request, jsonify, g
+from flask import Blueprint, request, jsonify, g
 from flask_login import current_user, login_user, logout_user, login_required
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
@@ -12,12 +12,14 @@ from app.models.role_model import Role
 from app.models.user_model import User
 from app.errors import error_response
 
+user_blueprint = Blueprint('user_blueprint', __name__)
+
 @login.user_loader
 def load_user(id):
     return User.query.get(int(id))
 
 
-@app.route('/api/authorization', methods=['POST'])
+@user_blueprint.route('/authorization', methods=['POST'])
 def authorization():
     
     username = request.json['username']
@@ -26,9 +28,7 @@ def authorization():
     if user:
         if not user.remove_date:
             if user.password == password:
-                g.current_user = user
                 login_user(user, remember=True)
-                print(current_user.is_authenticated)
                 return jsonify({'Success':'User has been authenticated'})
             else:
                 return error_response(404, 'Wrong password')
@@ -38,13 +38,13 @@ def authorization():
         return error_response(404, "Incorrect data")
 
 
-@app.route('/api/profile/<int:id>')
+@user_blueprint.route('/profile/<int:id>')
 def user_profile(id):
     page = request.args.get('page', 1, type=int)
     on_page = request.args.get('on_page', ARTICLES_PER_PAGE, type=int)
     sort_type = request.args.get('sort_by', 'date', type=str)
     
-    user = User.query.filter_by(id=id).first_or_404()
+    user = User.query.filter_by(id=id).first()
     if sort_type == 'date':
         articles = Article.query.order_by(Article.create_date.desc()).filter_by(user=id).paginate(page, on_page, False)
     elif pole == 'title':
@@ -68,14 +68,14 @@ def user_profile(id):
     return jsonify({'articles':articles_to_template})
 
 
-@app.route('/api/logout', methods=['POST'])
+@user_blueprint.route('/logout', methods=['POST'])
 def logout():
     if g.current_user.is_authenticated:
         logout_user()
     return jsonify({'Success':'User has been logouted'})
 
 
-@app.route('/api/registration', methods=['POST'])
+@user_blueprint.route('/registration', methods=['POST'])
 def registration():
     name = request.json['u_name']
     username = request.json['username']
@@ -87,6 +87,8 @@ def registration():
         return error_response(400, 'User has already registered')
 
     new_user = User(name=name, username=username, password=password)
+
+    login_user(new_user)
 
     db.session.add(new_user)
     db.session.commit()

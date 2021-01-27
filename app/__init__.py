@@ -1,4 +1,4 @@
-from flask import Flask, render_template, url_for, request, redirect
+from flask import Flask, Blueprint, render_template, url_for, request, redirect
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager, current_user, login_user, logout_user
@@ -26,6 +26,13 @@ from app.admin import admin_routes
 from app.models.user_model import User
 from app.models.article_model import Article
 from app.models.role_model import Role
+from app.routes.user_routes import user_blueprint
+from app.routes.article_routes import article_blueprint
+from app.admin.admin_routes import admin_blueprint
+
+app.register_blueprint(user_blueprint, url_prefix='/api/user')
+app.register_blueprint(article_blueprint, url_prefix='/api/article')
+app.register_blueprint(admin_blueprint, url_prefix='/admin')
 
 admin = Admin(app)
 admin.add_view(AdminView(User, db.session))

@@ -1,27 +1,39 @@
-from flask import render_template, url_for, request
-from flask_admin import expose
-from flask_login import current_user, login_user, logout_user
+from flask import Blueprint, render_template, url_for, request, session
 from app.models.user_model import User
 from app.models.role_model import Role
 from app import app, db
 
-@app.route('/login', methods=['POST', 'GET'])
+admin_blueprint = Blueprint('admin_blueprint', __name__, template_folder='templates')
+
+def login_admin():
+    session['admin_logged'] = 1
+
+def is_admin_logged():
+    if session['admin_logged']:
+        return True
+    else:
+        return False
+
+def logout_admin():
+    if session['admin_logged']:
+        session.pop('admin_logged')
+
+@admin_blueprint.route('/login', methods=['POST', 'GET'])
 def login_admin_panel():
-    if current_user.is_authenticated:
-        return 'Already auth'
     if request.method == 'GET':
         return render_template('login.html')
     else:
         username = request.form.get('username')
         password = request.form.get('password')
-
         user = User.query.filter_by(username=username).first()
-
         if user:
             if user.password == password:
                 if not user.remove_date:
-                    login_user(user)
-                    return 'Loged in'
+                    if user.is_admin:
+                        login_admin()
+                        return 'Loged in'
+                    else:
+                        return 'Not admin'
                 else:
                     return 'User removed'
             else:
@@ -29,14 +41,11 @@ def login_admin_panel():
         else:
             return 'Incorrect username'
                     
-@app.route('/logout', methods=['POST', 'GET'])
-def logout_a_user():    
-        if current_user.is_authenticated:
-            logout_user()
-            return 'Logouted'
-        else:
-            return 'Not auth'
 
-@expose('/admin_view', methods=['POST', 'GET'])
-def admin_view():
-    pass
+@admin_blueprint.route('/logout', methods=['POST', 'GET'])
+def logout_a_user():    
+    if is_admin_logged():
+        logout_admin()
+        return 'Logouted'
+    else:
+        return 'Not auth'
