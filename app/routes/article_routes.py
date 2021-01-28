@@ -10,6 +10,7 @@ from app.models.article_model import Article
 from app.models.user_model import User
 from app.errors import error_response
 from app.task import mark_article_deleted
+from app.queries import get_articles, get_articles_by_user
 
 article_blueprint = Blueprint('article_blueprint', __name__)
 
@@ -26,27 +27,26 @@ def articles_list():
     sort_type = request.args.get('sort_by', 'date', type=str)
 
     if sort_type == 'date':
-        articles = Article.query.order_by(Article.create_date.desc()).paginate(page, on_page, False)
+        articles = get_articles(Article.create_date, page, on_page)
     elif  sort_type== 'title':
-        articles = Article.query.order_by(Article.title.desc()).paginate(page, on_page, False)
+        articles = get_articles(Article.title.desc(), page, on_page)
     elif sort_type == 'update':
-        articles = Article.query.order_by(Article.update_date.desc()).paginate(page, on_page, False)
+        articles = get_articles(Article.update_date.desc(), page, on_page)
     elif sort_type == 'user':
-        articles = Article.query.order_by(Article.user.desc()).paginate(page, on_page, False)
+        articles = get_articles(Article.user.desc(), page, on_page)
     articles_to_template = []
     for article in articles.items:
-        if not article.remove_date:
-            obj = {
-                'id': article.id,
-                'create_date': article.create_date,
-                'update_date': article.update_date,
-                'remove_date': article.remove_date,
-                'user_id': article.user,
-                'title': article.title,
-                'body': article.body,
-                'end_date': article.end_date
-            }
-            articles_to_template.append(obj)
+        obj = {
+            'id': article.id,
+            'create_date': article.create_date,
+            'update_date': article.update_date,
+            'remove_date': article.remove_date,
+            'user_id': article.user,
+            'title': article.title,
+            'body': article.body,
+            'end_date': article.end_date
+        }
+        articles_to_template.append(obj)
     return jsonify({'articles': articles_to_template})
 
 
@@ -55,14 +55,12 @@ def article_detail(id):
     article = Article.query.get(id)
     if article.remove_date:
         return error_response(410, 'Article has been deleted')
-    user = User.query.get(article.user)
     obj = {
             'id': article.id,
             'create_date': article.create_date,
             'update_date': article.update_date,
             'remove_date': article.remove_date,
             'user_id': article.user,
-            'username': user.username,
             'title': article.title,
             'body': article.body,
             'end_date': article.end_date

@@ -11,6 +11,7 @@ from app.models.article_model import Article
 from app.models.role_model import Role
 from app.models.user_model import User
 from app.errors import error_response
+from app.queries import check_user_login, check_user_registration, get_articles_by_user
 
 user_blueprint = Blueprint('user_blueprint', __name__)
 
@@ -24,16 +25,9 @@ def authorization():
     
     username = request.json['username']
     password = request.json['password']
-    user = User.query.filter_by(username=username).first()
+    user = check_user_login(username, password)
     if user:
-        if not user.remove_date:
-            if user.password == password:
-                login_user(user, remember=True)
-                return jsonify({'Success':'User has been authenticated'})
-            else:
-                return error_response(404, 'Wrong password')
-        else:
-            return error_response(410, 'Deleted user')
+        login_user(user, remember=True)
     else:
         return error_response(404, "Incorrect data")
 
@@ -44,27 +38,25 @@ def user_profile(id):
     on_page = request.args.get('on_page', ARTICLES_PER_PAGE, type=int)
     sort_type = request.args.get('sort_by', 'date', type=str)
     
-    user = User.query.filter_by(id=id).first()
     if sort_type == 'date':
-        articles = Article.query.order_by(Article.create_date.desc()).filter_by(user=id).paginate(page, on_page, False)
+        articles = get_articles_by_user(Article.create_date, id, page, on_page)
     elif pole == 'title':
-        articles = Article.query.order_by(Article.title.desc()).filter_by(user=id).paginate(page, on_page, False)
+        articles = get_articles_by_user(Article.title, id, page, on_page)
     elif pole == 'update':
-        articles = Article.query.order_by(Article.update_date.desc()).filter_by(user=id).paginate(page, on_page, False)
+        articles = get_articles_by_user(Article.update_date, id, page, on_page)
     articles_to_template = []
     for article in articles.items:
-        if not article.remove_date:
-            obj = {
-                'id': article.id,
-                'create_date': article.create_date,
-                'update_date': article.update_date,
-                'remove_date': article.remove_date,
-                'user': article.user,
-                'title': article.title,
-                'body': article.body,
-                'end_date': article.end_date
-            }
-            articles_to_template.append(obj)
+        obj = {
+            'id': article.id,
+            'create_date': article.create_date,
+            'update_date': article.update_date,
+            'remove_date': article.remove_date,
+            'user': article.user,
+            'title': article.title,
+            'body': article.body,
+            'end_date': article.end_date
+        }
+        articles_to_template.append(obj)
     return jsonify({'articles':articles_to_template})
 
 
@@ -81,7 +73,7 @@ def registration():
     username = request.json['username']
     password = request.json['password']
 
-    user = User.query.filter_by(username=username).first()
+    user = check_user_registration(username)
 
     if user:
         return error_response(400, 'User has already registered')
