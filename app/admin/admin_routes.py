@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, url_for, request, session
+from flask import Blueprint, render_template, url_for, redirect, request, session
 from app.models.user_model import User
 from app.models.role_model import Role
 from app import app, db
@@ -9,14 +9,18 @@ def login_admin():
     session['admin_logged'] = 1
 
 def is_admin_logged():
-    if session['admin_logged']:
-        return True
-    else:
+    try:
+        if session['admin_logged']:
+            return True
+        else:
+            return False
+    except:
         return False
 
 def logout_admin():
     if session['admin_logged']:
         session.pop('admin_logged')
+
 
 @admin_blueprint.route('/login', methods=['POST', 'GET'])
 def login_admin_panel():

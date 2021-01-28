@@ -28,6 +28,7 @@ def authorization():
     user = check_user_login(username, password)
     if user:
         login_user(user, remember=True)
+        return jsonify({'Success':'User login'})
     else:
         return error_response(404, "Incorrect data")
 
@@ -60,9 +61,17 @@ def user_profile(id):
     return jsonify({'articles':articles_to_template})
 
 
+@user_blueprint.route('/change_password', methods=['POST'])
+@basic_auth.login_required
+def change_password():
+    new_password = request.json['password']
+    current_user.set_password(new_password)
+    db.session.commit()
+    return jsonify({'Success':'Password has been changed'})
+
 @user_blueprint.route('/logout', methods=['POST'])
 def logout():
-    if g.current_user.is_authenticated:
+    if current_user.is_authenticated:
         logout_user()
     return jsonify({'Success':'User has been logouted'})
 
@@ -78,7 +87,8 @@ def registration():
     if user:
         return error_response(400, 'User has already registered')
 
-    new_user = User(name=name, username=username, password=password)
+    new_user = User(name=name, username=username)
+    new_user.set_password(password)
 
     login_user(new_user)
 

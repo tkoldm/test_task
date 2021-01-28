@@ -9,7 +9,7 @@ from app.models.role_model import Role
 
 class AdminView(ModelView):
 
-    column_exclude_list = ['password', ]
+    column_exclude_list = ['password_hash', ]
     
     def is_accessible(self):
         try:

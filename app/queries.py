@@ -3,8 +3,8 @@ from app.models.user_model import User
 from app.models.article_model import Article
 
 def check_user_login(username, password):
-    query = User.query.filter_by(username=username).filter_by(password=password).filter_by(remove_date=None).first()
-    if query:
+    query = User.query.filter_by(username=username).filter_by(remove_date=None).first()
+    if query and query.check_password(password):
         return query
     else:
         return False
