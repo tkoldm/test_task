@@ -45,6 +45,15 @@ def login_admin_panel():
         else:
             return 'Incorrect username'
                     
+@admin_blueprint.route('/user/edit/', methods=['POST'])
+def get_edit():
+    user_id = request.args.get('id', type=int)
+    user = User.query.filter_by(id=user_id).first()
+    password = request.form.get('password_hash')
+    if not user.check_password(password):
+        user.set_password(password)
+        db.session.commit()
+    return'Edited'
 
 @admin_blueprint.route('/logout', methods=['POST', 'GET'])
 def logout_a_user():    
