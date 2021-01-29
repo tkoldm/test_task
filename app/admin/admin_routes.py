@@ -53,7 +53,7 @@ def get_edit():
     if not user.check_password(password):
         user.set_password(password)
         db.session.commit()
-    return'Edited'
+    return redirect('/admin/user')
 
 @admin_blueprint.route('/logout', methods=['POST', 'GET'])
 def logout_a_user():    
