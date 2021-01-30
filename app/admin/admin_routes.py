@@ -29,21 +29,12 @@ def login_admin_panel():
     else:
         username = request.form.get('username')
         password = request.form.get('password')
-        user = User.query.filter_by(username=username).first()
-        if user:
-            if user.password == password:
-                if not user.remove_date:
-                    if user.is_admin:
-                        login_admin()
-                        return 'Loged in'
-                    else:
-                        return 'Not admin'
-                else:
-                    return 'User removed'
-            else:
-                return 'Wrong password'
+        user = User.query.filter_by(username=username).filter_by(is_admin=True).filter_by(remove_date=None).first()
+        if user and user.check_password(password):
+            login_admin()
+            return 'Loged in'            
         else:
-            return 'Incorrect username'
+            return 'Incorrect Data'
                     
 @admin_blueprint.route('/user/edit/', methods=['POST'])
 def get_edit():
