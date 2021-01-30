@@ -24,6 +24,8 @@ def logout_admin():
 
 @admin_blueprint.route('/login', methods=['POST', 'GET'])
 def login_admin_panel():
+    if is_admin_logged():
+        return redirect('/admin/')
     if request.method == 'GET':
         return render_template('login.html')
     else:
@@ -32,9 +34,9 @@ def login_admin_panel():
         user = User.query.filter_by(username=username).filter_by(is_admin=True).filter_by(remove_date=None).first()
         if user and user.check_password(password):
             login_admin()
-            return 'Loged in'            
+            return redirect('/admin/user')            
         else:
-            return 'Incorrect Data'
+            return redirect('/admin')
                     
 @admin_blueprint.route('/user/edit/', methods=['POST'])
 def get_edit():
@@ -50,6 +52,6 @@ def get_edit():
 def logout_a_user():    
     if is_admin_logged():
         logout_admin()
-        return 'Logouted'
+        return redirect('/admin')
     else:
-        return 'Not auth'
+        return redirect('/admin')
