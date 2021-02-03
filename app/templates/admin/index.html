@@ -1,0 +1,26 @@
+{% extends 'admin/master.html' %}
+
+{% block menu_links %}
+    {% if user %}
+        <a href="{{ url_for('logout_a_user')}}">Logout</a>
+    {% endif %}
+{% endblock menu_links %}
+
+
+{% block body %}
+    {% if user %}
+        <div>
+            <h1>Hello {{ user.username }}</h1>
+        </div>
+    {% else %}
+        <div>
+            <form method="post">
+                <h1>Логин </h1> <input type="text" name="username">
+                <br>
+                <h1>Пароль </h1> <input type="password" name="password"> 
+                <br>
+                <button type="submit">Войти</button>
+            </form>
+        </div>
+    {% endif %}
+{% endblock %}

@@ -21,20 +21,18 @@ login.init_app(app)
 
 from app.routes import user_routes 
 from app.routes import article_routes
-from app.admin.admin_model import AdminView
+from app.admin.admin_model import AdminView, IndexView
 from app.admin import admin_routes
 from app.models.user_model import User
 from app.models.article_model import Article
 from app.models.role_model import Role
 from app.routes.user_routes import user_blueprint
 from app.routes.article_routes import article_blueprint
-from app.admin.admin_routes import admin_blueprint
 
 app.register_blueprint(user_blueprint, url_prefix='/api/user')
 app.register_blueprint(article_blueprint, url_prefix='/api/article')
-app.register_blueprint(admin_blueprint, url_prefix='/admin')
 
-admin = Admin(app)
+admin = Admin(app, index_view=IndexView())
 admin.add_view(AdminView(User, db.session))
 admin.add_view(AdminView(Role, db.session))
 admin.add_view(AdminView(Article, db.session))
