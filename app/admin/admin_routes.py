@@ -4,6 +4,7 @@ from flask_security import login_required
 from app.queries import check_user_login
 from app.models.user_model import User
 from app.models.role_model import Role
+from app.queries import check_user_registration
 from app import app, db
 
 def login_admin(username):
@@ -25,15 +26,20 @@ def logout_admin():
 
 @app.route('/admin/user/edit/', methods=['POST'])
 def get_edit():
+    update_data = {}
     user_id = request.args.get('id', type=int)
     user = User.query.filter_by(id=user_id).first()
     name = request.form.get('name')
     username = request.form.get('username')
     password = request.form.get('password_hash')
-    update_data = {'username': username, 'name':name, 'is_admin':True}
+    if username != user.username:
+        update_data['username'] = username
+    if name != user.name:
+        update_data['name'] = name
     if request.form.get('is_admin'):
         update_data['is_admin'] = True
-    User.query.filter_by(id=user_id).update(update_data)
+    if update_data:
+        User.query.filter_by(id=user_id).update(update_data)
     if not user.check_password(password):
         user.set_password(password)
         db.session.commit()
