@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 ARTICLES_PER_PAGE = 5
+DAYS_TO_END = 20
 
 class Config(object):
     load_dotenv()

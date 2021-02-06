@@ -5,7 +5,7 @@ from flask_login import current_user
 from app.auth import basic_auth
 from app import app, db, celery
 from config import ARTICLES_PER_PAGE
-from app.calculate_dates import days_to_mark
+from app.calculate_dates import days_to_mark, calculate_end_date, check_dates
 from app.models.article_model import Article
 from app.models.user_model import User
 from app.errors import error_response
@@ -130,12 +130,18 @@ def add_new_article():
 
         if not current_user.remove_date:
             title = request.json['title']
-            body = request.json['body']                
-            article = Article(title=title, body=body, user=current_user.id)                
+            body = request.json['body']
+            try:
+                end_date = request.json['end_date']
+                if not check_dates(end_date):
+                    return error_response(406, f'Date {end_date} lower')
+            except:
+                end_date = calculate_end_date()
+            article = Article(title=title, body=body, user=current_user.id, end_date=end_date)                
             db.session.add(article)
             db.session.commit()
             article = Article.query.order_by(Article.create_date.desc()).filter_by(user=current_user.id).first()
-            mark_article_deleted.apply_async(args=[article.id], eta=days_to_mark())
+            mark_article_deleted.apply_async(args=[article.id], eta=days_to_mark(article.end_date))
             return jsonify({'Success':'Artlicle has been added'})
         else:
             return error_response(401, f'User {user.username} has been blocked')
