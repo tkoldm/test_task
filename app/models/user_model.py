@@ -9,8 +9,8 @@ class User(UserMixin, DateMixin, db.Model):
     username = db.Column(db.String(64), unique=True, index=True)
     password_hash = db.Column(db.String(256))
     name = db.Column(db.String(128))
-    is_admin = db.Column(db.Boolean, default=False)
-    
+    role_id = db.Column(db.Integer, db.ForeignKey('role.id'))
+    role = db.relationship('Role')
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -20,5 +20,5 @@ class User(UserMixin, DateMixin, db.Model):
         return check_password_hash(self.password_hash, password)
 
     def __repr__(self):
-        return f'<User {self.id}>'
+        return self.username
 

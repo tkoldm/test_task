@@ -6,7 +6,8 @@ from datetime import datetime
 
 class Article(DateMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    user = db.Column(db.Integer, db.ForeignKey(User.id))
+    user_id = db.Column(db.Integer, db.ForeignKey(User.id))
+    user = db.relationship('User')
     title = db.Column(db.String(128))
     body = db.Column(db.Text)
     end_date = db.Column(db.DateTime)
