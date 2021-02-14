@@ -1,0 +1,29 @@
+version: '3.7'
+
+services:
+  redis:
+    image: redis:latest
+
+  db:
+    image: postgres:11-alpine
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=12345
+      - POSTGRES_DB=ad_db
+
+  web:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 5000:5000
+    links:
+      - db
+  
+  celery:
+    image: celery:4.0
+    command: celery worker -B -l info -A app.celery
+    links:
+      - redis
+    depends_on:
+      - redis
