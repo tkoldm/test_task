@@ -2,16 +2,17 @@ version: '3.7'
 
 services:
   redis:
+    container_name: redis_container
     image: redis:latest
-
   db:
+    container_name: database_container
     image: postgres:11-alpine
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=12345
       - POSTGRES_DB=ad_db
-
   web:
+    container_name: flask_container
     build: 
       context: .
       dockerfile: Dockerfile
@@ -19,10 +20,16 @@ services:
       - 5000:5000
     links:
       - db
-  
+    restart: always
+    depends_on: 
+      - db
+      - redis
+      - celery
   celery:
-    image: celery:4.0
-    command: celery worker -B -l info -A app.celery
+    container_name: celery_container
+    build: 
+      context: .
+      dockerfile: Dockerfile
     links:
       - redis
     depends_on:

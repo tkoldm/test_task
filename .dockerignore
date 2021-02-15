@@ -1,0 +1,12 @@
+# created by virtualenv automatically
+
+/Scripts
+/Lib
+app.db
+pyvenv.cfg
+test.py
+.vscode/*
+/*/__pycache__/
+/__pycache__
+/*/*/__pycache__
+/include/*
