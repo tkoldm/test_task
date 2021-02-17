@@ -13,7 +13,6 @@ COPY migrations migrations
 COPY task.py config.py boot.sh ./
 
 ENV FLASK_APP=task.py
-RUN export FLASK_APP=task.py
 
 RUN chmod +x boot.sh
 RUN chown -R task:task ./
