@@ -1,11 +1,16 @@
 FROM python:3.8.1-slim-buster
-WORKDIR /home/application
+
+RUN adduser task
+
+WORKDIR /home/task
 
 COPY requirements.txt requirements.txt
-COPY celery_boot.sh celery_boot.sh
-RUN python -m venv task
-RUN task/bin/pip install -r requirements.txt
+RUN pip install -r requirements.txt
 
-RUN chmod +x boot.sh
+COPY . ./
+RUN chmod +x celery_boot.sh
 
-ENTRYPOINT ["sh", "./celery_boot.sh" ]
+RUN chown -R task:task ./
+USER task
+
+ENTRYPOINT ["sh", "./celery_boot.sh"]

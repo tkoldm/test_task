@@ -2,6 +2,7 @@ alembic==1.4.3
 amqp==5.0.2
 aniso8601==8.1.0
 Babel==2.9.0
+bcrypt==3.2.0
 billiard==3.6.3.0
 blinker==1.4
 celery==5.0.5

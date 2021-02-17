@@ -1,3 +1,2 @@
-#!/bin/sh
-source task/bin/activate
+#!/bin/bash
 celery -A app.celery worker -B -l info 

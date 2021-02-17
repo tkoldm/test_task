@@ -1,17 +1,23 @@
 FROM python:3.8.1-slim-buster
+
 RUN adduser task
-WORKDIR /home/application
+
+WORKDIR /home/task
 
 COPY requirements.txt requirements.txt
-RUN python -m venv task
-RUN task/bin/pip install -r requirements.txt
-RUN task/bin/pip install gunicorn
+RUN pip install -r requirements.txt
+RUN pip install gunicorn
 
-COPY . .
+COPY app app
+COPY migrations migrations
+COPY task.py config.py boot.sh ./
+
 ENV FLASK_APP=task.py
-ENV FLASK_RUN_HOST=0.0.0.0
-RUN chmod +x boot.sh
-USER task
-EXPOSE 5000
+RUN export FLASK_APP=task.py
 
-ENTRYPOINT ["sh", "./boot.sh" ]
+RUN chmod +x boot.sh
+RUN chown -R task:task ./
+USER task
+
+EXPOSE 5000
+ENTRYPOINT ["sh", "./boot.sh"]
