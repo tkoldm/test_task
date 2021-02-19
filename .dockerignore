@@ -2,7 +2,6 @@
 
 /Scripts
 /Lib
-app.db
 pyvenv.cfg
 test.py
 .vscode/*

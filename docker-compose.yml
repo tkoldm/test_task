@@ -8,9 +8,12 @@ services:
     container_name: database_container
     image: postgres:11-alpine
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: 12345
-      POSTGRES_DB: ad_db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=12345
+      - POSTGRES_DB=ad_db
+    hostname: localhost
+    ports:
+      - 5432:5432
   web:
     container_name: flask_container
     build: 
