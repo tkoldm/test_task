@@ -7,7 +7,7 @@ from app.models.article_model import Article
 from app.models.role_model import Role
 from app.queries import check_user_registration
 from app.calculate_dates import calculate_end_date
-from app import app, db
+from app import app, db, logger
 
 def login_admin(username, role):
     session['admin_logged'] = {'is_authenticated': True,
@@ -47,6 +47,7 @@ def get_edit_user():
     if not user.check_password(password):
         user.set_password(password)
     db.session.commit()
+    logger.info(f"admin:{session['admin_logged'].get('username')} - changed user with id {user_id}")
     return redirect('/admin/user')
 
 @app.route('/admin/user/new/', methods=['POST'])
@@ -60,6 +61,7 @@ def add_new_user():
 
     db.session.add(new_user)
     db.session.commit()
+    logger.info(f"admin:{session['admin_logged'].get('username')} - added new user {username}")
     return redirect('/admin/user')
 
 @app.route('/admin/logout', methods=['POST', 'GET'])
@@ -88,6 +90,7 @@ def get_edit_article():
     if update_data:
         Article.query.filter_by(id=article_id).update(update_data)
     db.session.commit()
+    logger.info(f"admin:{session['admin_logged'].get('username')} - changed article with id {article_id}")
     return redirect('/admin/article')
 
 @app.route('/admin/article/new/', methods=['POST'])
@@ -104,4 +107,5 @@ def add_new_article():
     new_article = Article(title=title, body=body, user_id=user_id, end_date=end_date)
     db.session.add(new_article)
     db.session.commit()
+    logger.info(f"admin:{session['admin_logged'].get('username')} - added new article")
     return redirect('/admin/article')

@@ -5,7 +5,7 @@ from flask_login import current_user, login_user, logout_user, login_required
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
 from app.auth import basic_auth
-from app import app, db, login
+from app import app, db, login, logger
 from config import ARTICLES_PER_PAGE
 from app.models.article_model import Article
 from app.models.role_model import Role
@@ -26,11 +26,9 @@ def authorization():
     username = request.json['username']
     password = request.json['password']
     user = check_user_login(username, password)
-    if user:
-        login_user(user, remember=True)
-        return jsonify({'Success':'User login'})
-    else:
-        return error_response(404, "Incorrect data")
+    login_user(user, remember=True)
+    logger.info(f'user:{current_user.username} - logged in')
+    return jsonify({'Success':'User login'})
 
 
 @user_blueprint.route('/profile/<int:id>')
@@ -67,6 +65,7 @@ def change_password():
     new_password = request.json['password']
     current_user.set_password(new_password)
     db.session.commit()
+    logger.info(f'user:{current_user.username} - changed password')
     return jsonify({'Success':'Password has been changed'})
 
 @user_blueprint.route('/logout', methods=['POST'])
@@ -94,4 +93,5 @@ def registration():
 
     db.session.add(new_user)
     db.session.commit()
+    logger.info(f'user:{username} - has been registred')
     return jsonify({'Success':'User has been registered'})

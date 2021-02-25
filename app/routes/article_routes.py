@@ -3,7 +3,7 @@ from datetime import datetime
 from flask import Blueprint, url_for, request, redirect, jsonify
 from flask_login import current_user
 from app.auth import basic_auth
-from app import app, db, celery
+from app import app, db, celery, logger
 from config import ARTICLES_PER_PAGE
 from app.calculate_dates import days_to_mark, calculate_end_date, check_dates
 from app.models.article_model import Article
@@ -52,7 +52,11 @@ def articles_list():
 
 @article_blueprint.route('/<int:id>', methods=['GET'])
 def article_detail(id):
-    article = Article.query.get(id)
+    try:
+        article = Article.query.get(id)
+    except Exception as e:
+        logger.warning(f'article:{id} - get action failed with error: {e}')
+        return error_response(404, 'Article doesn\'t exist')
     if article.remove_date:
         return error_response(410, 'Article has been deleted')
     obj = {
@@ -76,7 +80,8 @@ def article_update(id):
         if current_user.is_authenticated:
             try:
                 article = Article.query.get(id)
-            except:
+            except Exception as e:
+                logger.warning(f'article:{id} - update action failed with error: {e}')
                 return error_response(404, 'Article doesn\'t exist')
 
             if not current_user.remove_date:
@@ -104,6 +109,7 @@ def article_delete(id):
         try:
             article = Article.query.get(id)
         except:
+            logger.warning(f'article:{id} - delete action failed with error: {e}')
             return error_response(404, 'Article doesn\'t exist')
         if not current_user.remove_date:
             if user_id == article.user:
@@ -134,6 +140,7 @@ def add_new_article():
             try:
                 end_date = request.json['end_date']
                 if not check_dates(end_date):
+                    logger.warning(f'user:{current_user.id} - add action failed with error: {e}')
                     return error_response(406, f'Date {end_date} lower')
             except:
                 end_date = calculate_end_date()
@@ -147,3 +154,20 @@ def add_new_article():
             return error_response(401, f'User {user.username} has been blocked')
     else:
         return error_response(401)
+
+@article_blueprint.route('/add_article_test', methods=['POST'])
+def add_new_article_test():
+    if not request.json:
+        return error_response(400, 'Incorrect type')
+    title = request.json['title']
+    body = request.json['body']
+    try:
+        end_date = request.json['end_date']
+        if not check_dates(end_date):
+            return error_response(406, f'Date {end_date} lower')
+    except:
+        end_date = calculate_end_date()
+    article = Article(title=title, body=body, end_date=end_date)                
+    db.session.add(article)
+    db.session.commit()
+    return jsonify({'Success':'Artlicle has been added'})
