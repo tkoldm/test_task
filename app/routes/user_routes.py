@@ -26,7 +26,7 @@ def authorization():
     username = request.json['username']
     password = request.json['password']
     user = check_user_login(username, password)
-    login_user(user, remember=True)
+    login_user(user)
     logger.info(f'user:{current_user.username} - logged in')
     return jsonify({'Success':'User login'})
 
@@ -60,13 +60,13 @@ def user_profile(id):
 
 
 @user_blueprint.route('/change_password', methods=['POST'])
-@basic_auth.login_required
 def change_password():
-    new_password = request.json['password']
-    current_user.set_password(new_password)
-    db.session.commit()
-    logger.info(f'user:{current_user.username} - changed password')
-    return jsonify({'Success':'Password has been changed'})
+    if current_user.is_authenticated:
+        new_password = request.json['password']
+        current_user.set_password(new_password)
+        db.session.commit()
+        logger.info(f'user:{current_user.username} - changed password')
+        return jsonify({'Success':'Password has been changed'})
 
 @user_blueprint.route('/logout', methods=['POST'])
 def logout():

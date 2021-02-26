@@ -2,6 +2,7 @@
 from datetime import datetime
 from flask import Blueprint, url_for, request, redirect, jsonify
 from flask_login import current_user
+from sqlalchemy.inspection import inspect
 from app.auth import basic_auth
 from app import app, db, celery, logger
 from config import ARTICLES_PER_PAGE
@@ -73,37 +74,43 @@ def article_detail(id):
     
 
 @article_blueprint.route('/<int:id>', methods=['PUT'])
-@basic_auth.login_required
 def article_update(id):
-    if request.method == 'PUT':
         
-        if current_user.is_authenticated:
-            try:
-                article = Article.query.get(id)
-            except Exception as e:
-                logger.warning(f'article:{id} - update action failed with error: {e}')
-                return error_response(404, 'Article doesn\'t exist')
-
-            if not current_user.remove_date:
-                if current_user.id == article.user:
-                    if not article.remove_date:
+    if current_user.is_authenticated:
+        try:
+            article = Article.query.get(id)
+        except Exception as e:
+            logger.warning(f'article:{id} - update action failed with error: {e}')
+            return error_response(404, 'Article doesn\'t exist')
+        if not current_user.remove_date:
+            if current_user.id == article.user_id:
+                if not article.remove_date:
+                    update_data = {}
+                    try:
                         title = request.json['title']
+                        update_data['title'] = title
+                    except:
+                        pass
+                    try:
                         body = request.json['body']
-                        article = Article.query.filter_by(id = id).update({'title': datetime.utcnow(), 'body':body})
-                        db.session.commit()
-                        return jsonify({'Success':'Article has been updated'})
-                    else:
-                        return error_response(410, 'Article deleted')
+                        update_data['body'] = body
+                    except:
+                        pass
+                    article = Article.query.filter_by(id = id).update(update_data)
+                    db.session.commit()
+                    logger.info(f'user:{current_user.username} - update article {id}')
+                    return jsonify({'Success':'Article has been updated'})
                 else:
-                    return error_response(403, 'Atricle from another user')
+                    return error_response(410, 'Article deleted')
             else:
-                return error_response(410, 'Deleted user')
+                return error_response(403, 'Atricle from another user')
         else:
-            return error_response(401)
+            return error_response(410, 'Deleted user')
+    else:
+        return error_response(401)
 
 
 @article_blueprint.route('/<int:id>', methods=['DELETE'])
-@basic_auth.login_required
 def article_delete(id):
     if current_user.is_authenticated:
         try:
@@ -112,10 +119,11 @@ def article_delete(id):
             logger.warning(f'article:{id} - delete action failed with error: {e}')
             return error_response(404, 'Article doesn\'t exist')
         if not current_user.remove_date:
-            if user_id == article.user:
+            if current_user.id == article.user_id:
                 if not article.remove_date:
                     article = Article.query.filter_by(id = id).update({'remove_date': datetime.utcnow()})
                     db.session.commit()
+                    logger.info(f'user:{current_user.username} - delete article {id}')
                     return jsonify({'Success':'Article deleted'})
                 else:
                     return error_response(410, 'Article deleted')
@@ -128,7 +136,6 @@ def article_delete(id):
 
 
 @article_blueprint.route('/add_article', methods=['POST'])
-@basic_auth.login_required
 def add_new_article():
     if current_user.is_authenticated:
         if not request.json:
@@ -144,30 +151,14 @@ def add_new_article():
                     return error_response(406, f'Date {end_date} lower')
             except:
                 end_date = calculate_end_date()
-            article = Article(title=title, body=body, user=current_user.id, end_date=end_date)                
+            article = Article(title=title, body=body, user_id=current_user.id, end_date=end_date)                
             db.session.add(article)
             db.session.commit()
-            article = Article.query.order_by(Article.create_date.desc()).filter_by(user=current_user.id).first()
+            article = Article.query.order_by(Article.create_date.desc()).filter_by(user_id=current_user.id).first()
             mark_article_deleted.apply_async(args=[article.id], eta=days_to_mark(article.end_date))
+            logger.info(f'user:{current_user.username} - add new article')
             return jsonify({'Success':'Artlicle has been added'})
         else:
             return error_response(401, f'User {user.username} has been blocked')
     else:
         return error_response(401)
-
-@article_blueprint.route('/add_article_test', methods=['POST'])
-def add_new_article_test():
-    if not request.json:
-        return error_response(400, 'Incorrect type')
-    title = request.json['title']
-    body = request.json['body']
-    try:
-        end_date = request.json['end_date']
-        if not check_dates(end_date):
-            return error_response(406, f'Date {end_date} lower')
-    except:
-        end_date = calculate_end_date()
-    article = Article(title=title, body=body, end_date=end_date)                
-    db.session.add(article)
-    db.session.commit()
-    return jsonify({'Success':'Artlicle has been added'})
